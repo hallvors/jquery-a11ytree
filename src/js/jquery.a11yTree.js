@@ -41,6 +41,7 @@
             this.attachToggle($tree);
             this.addMouseNav($tree);
             this.addKeyBoardNav($tree);
+            this.highlightByUrlAndFragment($tree, location.pathname, location.hash);
         },
         addIdToTreeLabels: function ($tree) {
             var self = this;
@@ -303,6 +304,13 @@
                 id = $listItem.data(ITEM_ID_DATA_ATTR) || $list.parent(LIST_ITEM_SELECTOR).attr(ID_ATTR_NAME);
             }
             return id + '-' + $list.children(LIST_ITEM_SELECTOR).index($listItem);
+        },
+        highlightByUrlAndFragment : function($tree, pathName, fragment) {
+            var relevantAnchor = $tree.find('a[href*="' + pathName + fragment + '"]');
+            if(relevantAnchor.length === 1) {
+                this.expand(relevantAnchor.parents('li'));
+                this.focusOn(relevantAnchor.closest('li'), $tree);
+            }
         }
     };
 
