@@ -23,7 +23,8 @@
             html : undefined
         },
         onExpand : function() {},
-        onCollapse : function() {}
+        onCollapse : function() {},
+        markEntryActiveOnScroll: true
     };
 
     function Plugin( element, options ) {
@@ -42,6 +43,11 @@
             this.addMouseNav($tree);
             this.addKeyBoardNav($tree);
             this.highlightByUrlAndFragment($tree, location.pathname, location.hash);
+            if (this.options.markEntryActiveOnScroll) {
+                // Highlight #anchor menu entries when target is scrolled to
+                // Depends on scrollParent() method from jQuery UI
+                this.initMarkActiveOnScroll($tree, location.pathname);
+            }
         },
         addIdToTreeLabels: function ($tree) {
             var self = this;
@@ -311,6 +317,49 @@
                 this.expand(relevantAnchor.parents('li'));
                 this.focusOn(relevantAnchor.closest('li'), $tree);
             }
+        },
+        initMarkActiveOnScroll : function($tree, pathName) {
+            var self = this;
+            var samePageLinks = [];
+            var scrollParents = [];
+            var $elements = $tree.find('a[href*="' + pathName + '"]');
+            $elements.each(function() {
+                var link = this;
+                var fragment =link.hash;
+                var targetElm = $(fragment) || $(document).find('a[name="' + fragment.substr(1) + '"]');
+                if (targetElm) {
+                    samePageLinks.push({
+                        elm: targetElm,
+                        link: link,
+                        initialOffset: targetElm.offset().top
+                    });
+                    var parent = targetElm.scrollParent(); // method from jQuery UI
+                    if (scrollParents.indexOf(parent) === -1) {
+                        scrollParents.push(parent);
+                    }
+                }
+            });
+            // sort by offset - sort of gets us document order
+            samePageLinks = samePageLinks.sort(function(a,b) {
+                return a.initialOffset < b.initialOffset;
+            });
+            scrollParents.forEach(function(parent) {
+                var pastOffset = 0;
+                $(parent).scroll(function(evt) {
+                    var currentPos = evt.target.scrollTop;
+                    if (Math.max(currentPos, pastOffset) - Math.min(currentPos, pastOffset) < 100) {
+                        return; // Throttle to avoid calling expensive methods too often
+                    }
+                    pastOffset = currentPos;
+                    for (var i = 0; i < samePageLinks.length; i++) {
+                        if (samePageLinks[i].elm.offset().top < 150) {
+                            // target element is near or above the fold
+                            self.highlightByUrlAndFragment($tree, pathName, samePageLinks[i].link.hash);
+                            break;
+                        }
+                    }
+                });
+            });
         }
     };
 
