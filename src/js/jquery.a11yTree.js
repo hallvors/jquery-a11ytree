@@ -312,7 +312,7 @@
             return id + '-' + $list.children(LIST_ITEM_SELECTOR).index($listItem);
         },
         highlightByUrlAndFragment : function($tree, pathName, fragment) {
-            var relevantAnchor = $tree.find('a[href*="' + pathName + fragment + '"]');
+            var relevantAnchor = $tree.find('a[href*="' + pathName + fragment + '"]:first');
             if(relevantAnchor.length === 1) {
                 this.expand(relevantAnchor.parents('li'));
                 this.focusOn(relevantAnchor.closest('li'), $tree);
