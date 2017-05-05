@@ -327,7 +327,7 @@
                 var link = this;
                 var fragment =link.hash;
                 var targetElm = $(fragment) || $(document).find('a[name="' + fragment.substr(1) + '"]');
-                if (targetElm) {
+                if (targetElm.length) {
                     samePageLinks.push({
                         elm: targetElm,
                         link: link,
